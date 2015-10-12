@@ -1,0 +1,9 @@
+package ruichen;
+
+public class Poker {
+	public static void main(String[] args){
+		//System.out.println("Hello WOrld");
+		Card aCard = new Card(Suit.Diamond, Rank._10);
+		System.out.println(aCard);
+	}
+}

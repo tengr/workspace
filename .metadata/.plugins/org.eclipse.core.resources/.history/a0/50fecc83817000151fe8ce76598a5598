@@ -1,0 +1,8 @@
+package ruichen;
+
+public enum Suit {
+	Club, Diamond, Heart, Spade
+	private Suit(String initial){
+		
+	}
+}

@@ -1,0 +1,23 @@
+package ruichen;
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class Hand {
+	private ArrayList<Card> cards;
+	
+	public Hand(ArrayList<Card> cards){
+		this.cards = Collections.sort(cards);
+	}
+	
+	public boolean isStraight(){
+		return true;
+	}
+	
+	public boolean isFlush(){
+		return true;
+	}
+	
+	public int nOfAKind(){
+		return 1;
+	}
+}

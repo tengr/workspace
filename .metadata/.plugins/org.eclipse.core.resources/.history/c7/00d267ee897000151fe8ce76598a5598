@@ -1,0 +1,40 @@
+package ruichen;
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class Hand {
+	private ArrayList<Card> cards;
+	private int size;
+	
+	public Hand(ArrayList<Card> cards){
+		Collections.sort(cards);
+		this.cards = cards;
+		this.size = cards.size();
+	}
+	
+	public boolean isStraight(){
+		for(int i = 0; i < this.size - 1; i++) {
+			if(cards.get(i + 1).getRank() != cards.get(i).getRank() + 1) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean isFlush(){
+		for(int i = 0; i < this.size - 1; i++) {
+			if(!cards.get(i + 1).getSuit().equals(cards.get(i).getSuit())) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public int[] nOfAKind(){
+		for(int i = 0; i < this.size - 1; i++) {
+			if(cards.get(i + 1).getRank() != cards.get(i).getRank()) {
+				return false;
+			}
+		}	
+	}
+}

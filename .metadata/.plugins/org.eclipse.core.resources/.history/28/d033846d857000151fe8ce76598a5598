@@ -1,0 +1,10 @@
+package ruichen;
+
+public class Card {
+	public Enum<Suit> suit;
+	public Enum<Rank> rank;
+	public Card(Enum<Suit> suit, Enum<Rank> rank) {
+		this.suit = suit;
+		this.rank = rank;
+	}
+}

@@ -1,0 +1,11 @@
+package ruichen;
+
+public enum Rank {
+	_2, _3, _4, _5, _6, _7, _8, _9, _10, J("Jack"), Q("Queen"), K("King"), A("Ace");
+	
+	private Stirng fullName;
+	
+	private Rank(String fullName){
+		this.fullName = fullName;
+	}
+}

@@ -1,0 +1,33 @@
+import nltk
+import sys
+import re
+import string
+import os
+from nltk.stem import PorterStemmer
+from nltk.tokenize import *
+from nltk.corpus import stopwords   
+import cPickle
+
+pos_dic = {}
+stemmer = PorterStemmer()
+dirname = "/Users/ruichen/Documents/COMP90042/proj1/proj1data/blogs/"
+filenames = [f for f in os.listdir(dirname) if os.path.isfile(dirname + f) and os.path.getsize(dirname + f) > 0 ]
+#stopset = set(stopwords.words('english'))
+print "len" + str(len(filenames))
+
+for filename in filenames:
+    with open(dirname + filename,'r') as f:
+        text = re.sub(r"[\W]", " ", f.read())
+        tokens = nltk.word_tokenize(text.lower())
+        for i in xrange(len(tokens)):
+                word = stemmer.stem(tokens[i].decode('utf8', 'ignore'))
+                if word in pos_dic:
+                    if filename in pos_dic[word]:
+                        pos_dic[word][filename].append(i)
+                    else:
+                        pos_dic[word][filename] = [i]
+                else: 
+                    pos_dic[word] = {}
+                    pos_dic[word][filename] = [i]
+
+cPickle.dump(pos_dic,open("post_dic.dat",'w'), cPickle.HIGHEST_PROTOCOL)

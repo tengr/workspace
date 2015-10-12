@@ -1,0 +1,937 @@
+package com.ibm.cav.servlet;
+
+/***************************************************************************
+ * IBM Source Material
+ * (C) COPYRIGHT International Business Machines Corp., 2012.
+ *
+ * The source code for this program is not published or otherwise divested
+ * of its trade secrets, irrespective of what has been deposited with the
+ * U. S. Copyright Office.
+ ***************************************************************************/
+
+//Author eser@us.ibm.com
+
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.sling.commons.json.JSONArray;
+import org.apache.sling.commons.json.JSONObject;
+import org.apache.sling.commons.json.JSONTokener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import twitter4j.auth.AccessToken;
+
+import com.ibm.cav.ExpiringRepository;
+import com.ibm.cav.TwitterStreamingEngine;
+
+
+/**
+ * Servlet implementation class TwitterStreamingEngineServlet
+ */
+@WebServlet("/TwitterStreamingEngineServlet")
+public class TwitterStreamingEngineServlet extends HttpServlet {
+	public static final String ADD_STREAM_ACTION = "addStream";
+	public static final String AUTH_ACTION = "auth";
+	// Stream actions
+	public static final String CONNECT_STREAM_ACTION = "connectStream";
+	public static final String DISCONNECT_STREAMS_ACTION = "disconnectStream";
+	public static final String FILTER_STREAM_ACTION = "filterStream";
+	public static final String INFO_ACTION = "info";
+
+	public static final String LIST_STREAMS_ACTION = "listStreams";
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(TwitterStreamingEngineServlet.class);
+	public static final String PAUSE_STREAM_ACTION = "pauseStream";
+	public static final String REMOVE_STREAM_ACTION = "removeStream";
+	public static final String RESET_STREAM_EXPIRATION_ACTION = "resetStreamExpiration";
+	public static final String RESUME_STREAM_ACTION = "resumeStream";
+	private static final long serialVersionUID = 1L;
+	public static final String SET_DROP_RATE_LIMIT_ACTION = "setStreamDropRateLimit";
+	public static final String SHUTDOWN_ACTION = "shutdown";
+	public static final String START_STREAM_ACTION = "startStream";
+	// Engine actions
+	public static final String STARTUP_ACTION = "startup";
+	public static final String STOP_STREAM_ACTION = "stopStream";
+	
+	public static final String CHANGE_QUERY_ACTION = "changeQuery";
+	public static final String START_RECORDING_ACTION = "startRecording";
+	public static final String STOP_RECORDING_ACTION = "stopRecording";
+	// THIS IS DEPRICATED
+	public static final String UPDATE_STREAM_ACTION = "updateStream";
+	public static final String GET_DEFAULT_COLDSTART = "defaultColdstart" ;
+
+	private static String readFileAsString(String filePath)
+			throws java.io.IOException {
+		final byte[] buffer = new byte[(int) new File(filePath).length()];
+		BufferedInputStream f = null;
+		try {
+			f = new BufferedInputStream(new FileInputStream(filePath));
+			f.read(buffer);
+			if (f != null) {
+				try {
+					f.close();
+				} catch (final IOException e) {
+					LOGGER.warn("failed to close file" + filePath);
+					LOGGER.trace("Failed to close file", e);
+				}
+			}
+		} catch (final IOException e) {
+			LOGGER.warn("File not found or invalid path.");
+			LOGGER.trace("File not found or invalid path.", e);
+		}
+		return new String(buffer);
+	}
+
+	// Twitter Streaming Engine
+	private TwitterStreamingEngine defaultEngine = null;
+
+	// Engine Configuration
+	private JSONObject engineConfig;
+
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public TwitterStreamingEngineServlet() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	private JSONObject createDefaultEngineConfig(String admin) throws Exception {
+		// Create a default engine config;
+		engineConfig = new JSONObject();
+		engineConfig.put("admin", admin);
+
+		final JSONArray streams = new JSONArray();
+		engineConfig.put("streams", streams);
+
+		// Define a default stream
+		final JSONObject defaultStream = new JSONObject();
+		defaultStream.put("name", "IBM");
+		defaultStream.put("query", "ibm");
+		defaultStream.put("dedicated", "false");
+		defaultStream.put("filter", "{}");
+		defaultStream.put("record", "false"); // recording now becomes a mendatory part of engine config
+		
+		boolean coldStartFlag;
+		try {
+			coldStartFlag = cavcontext.keyValueAsBoolean("cold_start");
+		} catch (Exception e) {
+			LOGGER.info("cold start is not set");
+			coldStartFlag = true;
+		}
+		
+		defaultStream.put("coldstart", coldStartFlag);
+		
+		// streams.add(defaultStream);
+		// overwriting the add function
+		streams.put(defaultStream);
+
+		// Persist engine config
+		saveDefaultEngineConfig();
+
+		return engineConfig;
+	}
+
+	public void deleteDefaultEngineConfig() throws Exception {
+		final File f = new File(FILE_ENGINE_CONFIG);
+		if (f.canWrite()) {
+			f.delete();
+		}
+	}
+
+	@Override
+	public void destroy() {
+		// Shutdown default streaming engine
+		try {
+			shutdownDefaultEngine();
+		} catch (final Exception e) {
+			LOGGER.error("Error during engine shutdown", e);
+			return;
+		}
+	}
+
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	public void doGet(HttpServletRequest request,
+			HttpServletResponse response) {
+
+		final String action = getInput(request, REQUEST_ACTION);
+		response.setContentType("application/json");
+
+		PrintWriter out = null;
+
+		String jsonStr = null;
+		boolean decorateJSON = false;
+		final String callback = getInput(request, REQUEST_RETURN_TYPE);
+		if (callback != null) {
+			decorateJSON = true;
+			response.setContentType("text/javascript");
+		}
+
+		try {
+			out = response.getWriter();
+		} catch (final Exception e) {
+			LOGGER.error("Failure to create repsonse", e);
+			return;
+		}
+
+		String originator = getInput(request, REQUEST_ORIGINATOR);
+		if (originator == null) {
+			originator = "index.html";
+		}
+
+		request.getSession().setAttribute(SESSION_ORIGINATOR, originator);
+
+		if (action == null) {
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+					+ "\"message\": " + "\"" + "Incorrect backend call!" + "\""
+					+ "}", decorateJSON, callback);
+			out.print(jsonStr);
+			return;
+		} else if (action.equalsIgnoreCase(GET_DEFAULT_COLDSTART)) {
+			
+			boolean default_coldstart;
+			try {
+				default_coldstart = cavcontext.keyValueAsBoolean("cold_start");
+				LOGGER.info("Requested default coldstart value: " + default_coldstart);
+			} catch (Exception e) {
+				LOGGER.info("default cold start is not set");
+				default_coldstart = true;
+			}
+
+			// Success
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + ","
+					+ "\"default\": " + "\"" + default_coldstart
+					+ "\"" + "}", decorateJSON, callback);
+			out.print(jsonStr);
+			return;
+		}else if (action.equalsIgnoreCase(STARTUP_ACTION)) {
+
+			try {
+				if (engineConfig == null) {
+					// Use credentials in session to create a new engine
+					final AccessToken accessToken = (AccessToken) request
+							.getSession().getAttribute(SESSION_ACCESS_TOKEN);
+					final String admin = accessToken.getScreenName();
+					// Create a new configuration
+					createDefaultEngineConfig(admin);
+				}
+
+				shutdownDefaultEngine();
+				startDefaultEngine();
+
+				request.getServletContext().setAttribute(CONTEXT_ENGINE,
+						defaultEngine);
+			} catch (final Exception e) {
+				LOGGER.error("Failure to startup engine", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not start engine!"
+						+ "\"" + "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Success
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + "}",
+					decorateJSON, callback);
+			out.print(jsonStr);
+		} else if (action.equalsIgnoreCase(SHUTDOWN_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Shutdown engine
+			try {
+				defaultEngine.shutdown();
+			} catch (final Exception e) {
+				LOGGER.error("Failure shutting down engine", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not shutdown engine"
+						+ "\"" + "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Success
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + "}",
+					decorateJSON, callback);
+			out.print(jsonStr);
+		} else if (action.equalsIgnoreCase(AUTH_ACTION)) {
+
+			final AccessToken managerAccessToken = (AccessToken) request
+					.getServletContext().getAttribute("managerAccessToken");
+			if (managerAccessToken != null) {
+				String screenname = managerAccessToken.getScreenName();
+				// Manager Access Token doesn't have screen name saved, get it
+				// from engineConfig
+				if (screenname == null) {
+					try {
+						screenname = engineConfig.getString("admin");
+					} catch (final Exception e) {
+						LOGGER.warn("Could not get screenname from access token.");
+						LOGGER.trace("Could not get screename from access token", e);
+					}
+				}
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS
+						+ ", \"manager\": " + "\"" + screenname + "\"" + "}",
+						decorateJSON, callback);
+				out.print(jsonStr);
+			} else {
+				// Has the manager just authenticated?
+				final AccessToken userAccessToken = (AccessToken) request
+						.getSession().getAttribute("accessToken");
+				if (userAccessToken != null) {
+					request.getServletContext().setAttribute(
+							"managerAccessToken", userAccessToken);
+					jsonStr = respDecorator(
+							"{\"result\": " + RESPONSE_SUCCESS
+									+ ", \"manager\": " + "\""
+									+ userAccessToken.getScreenName() + "\""
+									+ "}", decorateJSON, callback);
+				} else {
+					jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR
+							+ "}", decorateJSON, callback);
+				}
+				out.print(jsonStr);
+			}
+		} else if (action.equalsIgnoreCase(INFO_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			JSONObject engineInfoJSON = null;
+			try {
+				engineInfoJSON = defaultEngine.getEngineInfo();
+			} catch (final Exception e) {
+				LOGGER.error("Failed to get engine info", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not get info!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			try {
+				final JSONObject r = new JSONObject();
+				r.put("result", "SUCCESS");
+				r.put("info", engineInfoJSON);
+				out.print(r.toString());
+			} catch (final Exception e) {
+				LOGGER.error("Failed to get engine info", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not get info!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+		} else if (action.equalsIgnoreCase(CONNECT_STREAM_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			final String name = getInput(request, "name");
+
+			// Connect to engine (client)
+			try {
+				defaultEngine.addConnection(name, request.getRemoteAddr());
+			} catch (final Exception e) {
+				LOGGER.error("Failed to add connection to stream", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\""
+						+ "Could not connect to stream!" + "\"" + "}",
+						decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Success
+			out.print("{\"result\": " + RESPONSE_SUCCESS + "}");
+		} else if (action.equalsIgnoreCase(DISCONNECT_STREAMS_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			final String name = getInput(request, REQUEST_NAME);
+
+			// Connect to engine (client)
+			try {
+				defaultEngine.removeConnection(name, request.getRemoteAddr());
+			} catch (final Exception e) {
+				LOGGER.error("Could not disconnect from stream", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\""
+						+ "Could not disconnect from stream!" + "\"" + "}",
+						decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Success
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + "}",
+					decorateJSON, callback);
+			out.print(jsonStr);
+		} else if (action.equalsIgnoreCase(LIST_STREAMS_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			JSONArray streamsInfoJSON = null;
+			try {
+				streamsInfoJSON = defaultEngine.getDetailedStreamsInfo();
+			} catch (final Exception e) {
+				LOGGER.error("Could not list streams", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not list streams!"
+						+ "\"" + "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			try {
+				final JSONObject r = new JSONObject();
+				r.put("result", "SUCCESS");
+				r.put("streams", streamsInfoJSON);
+				out.print(r.toString());
+			} catch (final Exception e) {
+				LOGGER.error("Could not list streams", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not list streams!"
+						+ "\"" + "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+				// TODO
+			}
+		} else if (action.equalsIgnoreCase(ADD_STREAM_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Add a new stream definition
+			final String play = getInput(request, REQUEST_PLAY);
+			final boolean record = getInputToBool(request, REQUEST_RECORD);
+			final String query = getInput(request, REQUEST_QUERY);
+			final String name = getInput(request, REQUEST_NAME);
+			final String dedicated = getInput(request, REQUEST_DEDICATED);
+			final String filter = getInput(request, REQUEST_FILTER);
+			
+			final String coldstartString = getInput(request, REQUEST_COLD_START);
+			LOGGER.info("Coldstart string: " + coldstartString);
+			boolean coldstart;
+			
+			if (coldstartString != null && coldstartString.equalsIgnoreCase("true")) {
+				coldstart = true;
+				LOGGER.info("Coldstart set to true");
+			}else if (coldstartString != null && coldstartString.equalsIgnoreCase("false")) {
+				coldstart = false;
+				LOGGER.info("Coldstart set to false");
+			}else{
+				try {
+					coldstart = cavcontext.keyValueAsBoolean("cold_start");
+					LOGGER.info("Using default cold start value: " + coldstart);
+				} catch (Exception e) {
+					LOGGER.info("cold start is not set");
+					coldstart = true;
+				}
+			}
+
+			boolean isDedicated = false;
+			if (dedicated != null && dedicated.equalsIgnoreCase("true")) {
+				isDedicated = true;
+			}
+
+			try {
+				defaultEngine.addStream(name, query, play, record, isDedicated, filter, coldstart);
+
+				updateDefaultEngineConfig();
+			} catch (final Exception e) {
+				LOGGER.error("Could not add stream", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not add stream!"
+						+ "\"" + "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Respond
+			out.print("{\"result\": " + RESPONSE_SUCCESS + "}");
+		} else if (action.equalsIgnoreCase(UPDATE_STREAM_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Update an existing stream
+			final String play = getInput(request, REQUEST_PLAY);
+			final boolean record = getInputToBool(request, REQUEST_RECORD);
+			final String query = getInput(request, REQUEST_QUERY);
+			final String name = getInput(request, REQUEST_NAME);
+			final String filter = getInput(request, REQUEST_FILTER);
+			final String coldstartString = getInput(request, REQUEST_COLD_START);
+			LOGGER.info("Coldstart string: " + coldstartString);
+			boolean coldstart;
+			
+			if (coldstartString != null && coldstartString.equalsIgnoreCase("true")) {
+				coldstart = true;
+				LOGGER.info("Coldstart set to true");
+			}else if (coldstartString != null && coldstartString.equalsIgnoreCase("false")) {
+				coldstart = false;
+				LOGGER.info("Coldstart set to false");
+			}else{
+				try {
+					coldstart = cavcontext.keyValueAsBoolean("cold_start");
+					LOGGER.info("Using default cold start value: " + coldstart);
+				} catch (Exception e) {
+					LOGGER.info("cold start is not set");
+					coldstart = true;
+				}
+			}
+
+			try {
+				defaultEngine.updateStream(name, query, play, record, filter, coldstart);
+
+				updateDefaultEngineConfig();
+			} catch (final Exception e) {
+				LOGGER.error("Could not update stream", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not update stream!"
+						+ "\"" + "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Respond
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + "}",
+					decorateJSON, callback);
+			out.print(jsonStr);
+		} else if (action.equalsIgnoreCase(REMOVE_STREAM_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Remove an existing stream
+			final String name = getInput(request, "name");
+
+			try {
+				defaultEngine.removeStream(name);
+
+				updateDefaultEngineConfig();
+			} catch (final Exception e) {
+				LOGGER.error("Could not remove stream", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not remove stream!"
+						+ "\"" + "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Respond
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + "}",
+					decorateJSON, callback);
+			out.print(jsonStr);
+		} else if (action.equalsIgnoreCase(START_STREAM_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Start an existing stream
+			final String name = getInput(request, "name");
+
+			try {
+				defaultEngine.startStream(name);
+			} catch (final Exception e) {
+				LOGGER.error("Could not start stream", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not start stream!"
+						+ "\"" + "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Respond
+			out.print("{\"result\": " + RESPONSE_SUCCESS + "}");
+		} else if (action.equalsIgnoreCase(STOP_STREAM_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Stop an existing stream
+			final String name = getInput(request, "name");
+
+			try {
+				defaultEngine.stopStream(name);
+			} catch (final Exception e) {
+				LOGGER.error("Could not stop stream", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not stop stream!"
+						+ "\"" + "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Respond
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + "}",
+					decorateJSON, callback);
+			out.print(jsonStr);
+		} else if (action.equalsIgnoreCase(PAUSE_STREAM_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Pause an existing stream
+			final String name = getInput(request, "name");
+
+			try {
+				defaultEngine.pauseStream(name);
+			} catch (final Exception e) {
+				LOGGER.error("Could not pause stream", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not pause stream!"
+						+ "\"" + "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Respond
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + "}",
+					decorateJSON, callback);
+			out.print(jsonStr);
+		} else if (action.equalsIgnoreCase(RESUME_STREAM_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Resume an existing stream
+			final String name = getInput(request, "name");
+
+			try {
+				defaultEngine.resumeStream(name);
+			} catch (final Exception e) {
+				LOGGER.error("Could not resume stream", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "Could not resume stream!"
+						+ "\"" + "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Respond
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + "}",
+					decorateJSON, callback);
+			out.print(jsonStr);
+		} else if (action.equalsIgnoreCase(RESET_STREAM_EXPIRATION_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Reset expiration on an existing stream
+			final String name = getInput(request, "name");
+
+			final String expirationType = getInput(request, "type");
+			final String expirationSpan = getInput(request, "span");
+
+			int type = 0;
+			if (expirationType.equalsIgnoreCase("time")) {
+				type = ExpiringRepository.TIME_BASED;
+			} else if (expirationType.equalsIgnoreCase("volume")) {
+				type = ExpiringRepository.VOLUME_BASED;
+			}
+
+			int span = Integer.valueOf(expirationSpan).intValue();
+			if (type == ExpiringRepository.TIME_BASED) {
+				span *= 60000;
+			}
+
+			try {
+				defaultEngine.resetStreamExpiration(name, type, span);
+
+				updateDefaultEngineConfig();
+			} catch (final Exception e) {
+				LOGGER.error("Could not reset stream", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\""
+						+ "Could not reset stream expiration!" + "\"" + "}",
+						decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Respond
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + "}",
+					decorateJSON, callback);
+			out.print(jsonStr);
+		} else if (action.equalsIgnoreCase(FILTER_STREAM_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Filter on an existing stream
+			final String name = getInput(request, "name");
+			final String filter = getInput(request, "filter");
+
+			try {
+				defaultEngine.filterStream(name, filter);
+
+				updateDefaultEngineConfig();
+			} catch (final Exception e) {
+				LOGGER.error("Could not apply filters", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\""
+						+ "Could not apply filter on stream!" + "\"" + "}",
+						decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Respond
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + "}",
+					decorateJSON, callback);
+			out.print(jsonStr);
+		} else if (action.equalsIgnoreCase(SET_DROP_RATE_LIMIT_ACTION)) {
+			if (defaultEngine == null) {
+				// Respond with error
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\"" + "No engine exists!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Set drop rate limit on an existing stream
+			final String name = getInput(request, "name");
+
+			final String dropRateLimit = getInput(request, "dropRateLimit");
+
+			final int rate = Integer.valueOf(dropRateLimit).intValue();
+
+			try {
+				defaultEngine.setStreamDropRateLimit(name, rate);
+
+				updateDefaultEngineConfig();
+			} catch (final Exception e) {
+				LOGGER.error("Could not set drop rate limit on stream", e);
+				jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+						+ "\"message\": " + "\""
+						+ "Could not set drop rate limit on stream!" + "\""
+						+ "}", decorateJSON, callback);
+				out.print(jsonStr);
+				return;
+			}
+
+			// Respond
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_SUCCESS + "}",
+					decorateJSON, callback);
+			out.print(jsonStr);
+		} else {
+			jsonStr = respDecorator("{\"result\": " + RESPONSE_ERROR + ","
+					+ "\"message\": " + "\"" + "Unknown backend request!"
+					+ "\"" + "}", decorateJSON, callback);
+			out.print(jsonStr);
+			return;
+		}
+
+	}
+
+	/**
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	@Override
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+	}
+
+	private String getInput(HttpServletRequest request, String key) {
+		String value = request.getParameter(key);
+		if (value == null) {
+			value = request.getHeader(key);
+		}
+		return value;
+	}
+	private boolean getInputToBool(HttpServletRequest request, String key) {
+	    String value = request.getParameter(key);
+	    if (value == null) {
+	       value = request.getHeader(key);
+	    }
+	    if (value == null) {
+	        return false;
+	    } else if (value.equals("true")) {
+	        return true;
+	    } else {
+	        return false;
+	    }
+	}
+
+	@Override
+	public void init(ServletConfig config) {
+		try {
+			super.init(config);
+		} catch (final ServletException e) {
+			// TODO Auto-generated catch block
+			LOGGER.error("Failure to intialise", e);
+		}
+
+		try {
+			startDefaultEngine();
+
+			if (defaultEngine != null) {
+				final AccessToken managerAccessToken = defaultEngine
+						.getAccessToken();
+				config.getServletContext().setAttribute(
+						CONTEXT_MANAGER_ACCESS_TOKEN, managerAccessToken);
+				config.getServletContext().setAttribute(CONTEXT_ENGINE,
+						defaultEngine);
+			}
+
+		} catch (final Exception e) {
+			LOGGER.error("Error loading default access engine", e);
+		}
+	}
+
+	private void loadDefaultEngineConfig() throws Exception {
+		// ----------- Temp hardcoded engineConfig-----------------//
+		LOGGER.info(new File(FILE_ENGINE_CONFIG).getAbsolutePath());		
+		final JSONTokener fr = new JSONTokener(
+				readFileAsString(FILE_ENGINE_CONFIG));
+		engineConfig = new JSONObject(fr);
+		LOGGER.debug(engineConfig.toString());
+	}
+
+	private String respDecorator(String resp, boolean decorateJSON,
+			String callback) {
+		if (decorateJSON) {
+			return callback + "(" + resp + ");";
+		}
+		return resp;
+	}
+
+	private void saveDefaultEngineConfig() throws Exception {
+		/**
+		 * Lida: Changing BufferOutputStream to Writer for the new sling library
+		 */
+		// BufferedOutputStream bos = new BufferedOutputStream(
+		// new FileOutputStream(FILE_ENGINE_CONFIG));
+
+		final Writer bos = new BufferedWriter(
+				new FileWriter(FILE_ENGINE_CONFIG));
+		engineConfig.write(bos);
+		bos.flush();
+		bos.close();
+
+		LOGGER.info("EngingConfgin File: " + engineConfig);
+	}
+
+	private void shutdownDefaultEngine() throws Exception {
+		if (defaultEngine != null) {
+			defaultEngine.shutdown();
+		}
+	}
+
+	private void startDefaultEngine() throws Exception {
+		// Read from engine configuration file, if exists
+		try {
+			loadDefaultEngineConfig();
+		} catch (final Exception e) {
+			LOGGER.warn("Could not find default engine config.");
+			LOGGER.trace("Could not find or load default engine config.", e);
+		}
+
+		// Create an streaming engine using saved engine config, if exists
+		if (engineConfig != null) {
+			defaultEngine = new TwitterStreamingEngine();
+			defaultEngine.startupFromConfig(engineConfig);
+		}
+	}
+
+	private void updateDefaultEngineConfig() throws Exception {
+		engineConfig = defaultEngine.getEngineConfig();
+
+		saveDefaultEngineConfig();
+	}
+
+}

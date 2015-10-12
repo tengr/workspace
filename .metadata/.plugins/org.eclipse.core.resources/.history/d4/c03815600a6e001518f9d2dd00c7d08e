@@ -1,0 +1,157 @@
+package com.ruichen.app;
+
+//import io.netty.handler.timeout.TimeoutException;
+
+
+
+import java.net.URI;
+//import com.xqbase.etcd4j.EtcdClient;
+
+//import com.justinsb.etcd.EtcdClient;
+//import com.justinsb.etcd.EtcdClientException;
+//import com.justinsb.etcd.EtcdResult;
+import java.io.IOException;
+
+//import com.google.common.util.concurrent.ListenableFuture;
+//import com.justinsb.etcd.EtcdClient;
+//import com.justinsb.etcd.EtcdResult;
+
+
+
+//
+import mousio.etcd4j.EtcdClient;
+import mousio.etcd4j.promises.EtcdResponsePromise;
+import mousio.etcd4j.responses.EtcdKeysResponse;
+
+
+/**
+ * Hello world!
+ *
+ */
+public class App 
+{
+    public static void main( String[] args )
+    {
+        System.out.println( "Hello World!" );
+//        EtcdClient client = new EtcdClient(URI.create("http://discovery2-mel.sl.cloud9.ibm.com:4001/"));
+//
+//        String key = "/testmessage";
+//
+//        //EtcdResult result = client.set(key, "hello");
+//        //Assert.assertEquals("hello", result.value);
+//
+//        EtcdResult result = client.get(key);
+//        System.out.println(result.node.value);
+//        //Assert.assertEquals("hello", result.value);
+//
+//        ListenableFuture<EtcdResult> watchFuture = client.watch(key);
+//        try {
+//			EtcdResult watchResult = watchFuture.get(100, TimeUnit.MILLISECONDS);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (ExecutionException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (TimeoutException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+
+        
+        
+        		
+//        		watchFuture = client.watch(key, index, recursive)
+//        		
+//        		
+//        		
+//        		(key, result.errorIndex + 1);
+        //Syst
+       // Assert.assertFalse(watchFuture.isDone());
+
+        //result = client.set(key, "world");
+        //Assert.assertEquals("world", result.value);
+
+        //EtcdResult watchResult = watchFuture.get(100, TimeUnit.MILLISECONDS);
+        //Assert.assertNotNull(result);
+        //Assert.assertEquals("world", result.value);
+        
+//        EtcdClient client = new EtcdClient(URI.create("http://discovery2-mel.sl.cloud9.ibm.com:4001/"));
+//
+//        String key = "/smart";
+//        // set the key
+//        //client.set(key, "beepbosdsop");
+//        // get the value of the key
+//        String value = client.get(key);
+//        System.out.println(value);
+//working piece of code
+//           EtcdClient etcdClient = 
+//        		   new EtcdClient(URI.create("http://discovery1-mel.sl.cloud9.ibm.com:4001"), 
+//        				   URI.create("http://discovery2-mel.sl.cloud9.ibm.com:4001"),
+//        				   URI.create("http://discovery3-mel.sl.cloud9.ibm.com:4001"));
+//           System.out.println(etcdClient.getVersion());
+//           
+//           EtcdKeysResponse etcdKeysResponse = null;
+//           try {
+//				 //response = etcd.put("foo","bar").send().get();
+//				 //etcd.put("test", "{something,blaaaaa}");
+//				 String etcdCavKey = "smart/someclient/";
+//				 etcdClient.put(etcdCavKey + "/consumer_key", "gvkJHO51jpqUhpBqF47JJV4zg").send();
+//				 etcdClient.put(etcdCavKey + "/consumer_secret", "WVH7Sbnlu4JHxWYC8T0UqVIdh3hPxm13JeGFOzC8VYImtTUp3O").send();
+//				 etcdClient.put(etcdCavKey + "/server_url", "smart-env.playground.res.ibm.com").send();
+//				 etcdKeysResponse = etcdClient.get(etcdCavKey+ "consumer-secret").send().get();
+//	        	 	System.out.println(etcdKeysResponse.node.value);
+//	        	 
+////	        	 EtcdResponsePromise promise = etcdClient.get(etcdCavKey).waitForChange().send();
+////	        	 System.out.println(etcdCavKey.substring(etcdCavKey.length()-1));
+////	        	 IsSimplePromiseResponseHandler listener = null;
+////				promise.addListener(listener);
+////				ResponsePromise arg0 = null;
+////				listener.onResponse(arg0);
+////	        	 promise.addListener(promise1 -> {
+////	        		 EtcdKeysResponse response1 = (EtcdKeysResponse) promise1.getNow();
+////	        		    if(response1 != null){
+////	        		      System.out.println(response1.node.value);
+////	        		    }	        		});
+////
+////	        	 
+////	        	 
+////
+//			} catch (Exception e) {
+////				// TODO Auto-generated catch block
+////				e.printStackTrace();
+//			}
+//working piece of code			
+        
+        
+        	   // Prints out: bar
+//        	 }catch(EtcdException e){
+//        	   // Do something with the exception returned by etcd
+//        	 }catch(IOException e){
+//        	   // Exception happened in the retrieval. Do something with it.
+//        	 }catch(TimeoutException e){
+//        	   // Timeout happened. Do something
+//        	 }
+//        System.out.println(etcd.getVersion());
+//        System.out.println(etcd.get("devops").getUrl());
+//		//System.out.println(etcd.getAll().recursive().toString());
+//        //EtcdResponsePromise promise = etcd.get("devops").send();
+//        //etcd.put("foo","bar").send();
+//        System.out.println(etcd.get("devops").getPromise().getNow());
+
+//        try{
+//            try {
+//				EtcdKeysResponse response = (EtcdKeysResponse) promise.get();
+//				System.out.println(response.toString());
+//			} catch (java.util.concurrent.TimeoutException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//            // Do something with response
+//          }catch(EtcdException e){
+//            // Do something with the exception returned by etcd
+//          }catch(IOException | TimeoutException e){
+//            // Handle other types of exceptions
+//          }
+           }
+}

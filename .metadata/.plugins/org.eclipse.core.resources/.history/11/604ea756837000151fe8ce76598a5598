@@ -1,0 +1,21 @@
+package ruichen;
+import java.util.ArrayList;
+public class Hand {
+	private ArrayList<Card> cards;
+	
+	public Hand(ArrayList<Card> cards){
+		this.cards = cards;
+	}
+	
+	public boolean isStraight(){
+		
+	}
+	
+	public boolean isFlush(){
+		
+	}
+	
+	public int nOfAKind(){
+		
+	}
+}

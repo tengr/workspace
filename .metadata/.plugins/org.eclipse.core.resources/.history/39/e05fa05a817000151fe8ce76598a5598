@@ -1,0 +1,6 @@
+package ruichen;
+
+public enum Suit {
+	Club, Diamond, Heart, Spades
+	
+}

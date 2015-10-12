@@ -1,0 +1,16 @@
+package ruichen;
+
+public class Hand {
+	
+	public boolean isStraight(){
+		
+	}
+	
+	public boolean isFlush(){
+		
+	}
+	
+	public int nOfAKind(){
+		
+	}
+}

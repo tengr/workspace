@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/ruichen/Documents/COMP90055/stanford_dependency/DependenSee.2.0.5.jar"/>
+	<classpathentry kind="lib" path="/Users/ruichen/Documents/COMP90055/stanford_dependency/stanford-parser-2013-04-05/stanford-parser.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

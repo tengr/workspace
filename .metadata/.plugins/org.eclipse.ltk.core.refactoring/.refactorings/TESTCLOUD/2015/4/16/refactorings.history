@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;TESTCLOUD/clean.sh&apos; to &apos;clean_jobs.sh&apos;" description="Rename resource &apos;clean.sh&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="clean.sh" name="clean_jobs.sh" stamp="1428952761896" updateReferences="true"/>
+</session>

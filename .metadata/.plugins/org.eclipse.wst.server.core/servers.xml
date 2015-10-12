@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<servers>
+  <server auto-publish-setting="2" auto-publish-time="1" configuration-id="/Servers2/Apache Tomcat v7.0 for Android Group Chat at 10.17.129.176-config" deployDir="wtpwebapps" hostname="10.17.129.176" id="Apache Tomcat v7.0 for Android Group Chat at 10.17.129.176" name="Apache Tomcat v7.0 for Android Group Chat at 10.17.129.176" runtime-id="Apache Tomcat v7.0 for Android Group Chat" server-type="org.eclipse.jst.server.tomcat.70" server-type-id="org.eclipse.jst.server.tomcat.70" start-timeout="45" stop-timeout="15" testEnvironment="true" timestamp="3">
+    <list key="modules" value0="WebMobileGroupChatServer::org.eclipse.jst.jee.server:WebMobileGroupChatServer::jst.web::3.0"/>
+  </server>
+</servers>

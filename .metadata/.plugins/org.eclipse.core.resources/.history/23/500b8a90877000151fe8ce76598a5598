@@ -1,0 +1,10 @@
+package ruichen;
+
+public class Card Impements Comparable{
+	public Enum<Rank> rank;
+	public Enum<Suit> suit;
+	public Card(Enum<Rank> rank, Enum<Suit> suit) {
+		this.rank = rank;
+		this.suit = suit;
+	}
+}

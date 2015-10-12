@@ -1,0 +1,88 @@
+package ruichen;
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class Hand {
+	private ArrayList<Card> cards;
+	private int size;
+	
+	public Hand(ArrayList<Card> cards){
+		Collections.sort(cards);
+		this.cards = cards;
+		this.size = cards.size();
+	}
+	
+	public boolean isStraight(){
+		for(int i = 0; i < this.size - 1; i++) {
+			if(cards.get(i + 1).getRank() != cards.get(i).getRank() + 1) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean isFlush(){
+		for(int i = 0; i < this.size - 1; i++) {
+			if(!cards.get(i + 1).getSuit().equals(cards.get(i).getSuit())) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public int[] nOfAKind(){
+		int num = 1;
+		int[] res = {1, 1};
+		for(int i = 0; i < this.size - 1; i++) {
+			if(cards.get(i + 1).getRank() == cards.get(i).getRank()) {
+				num++;
+			}
+			else{
+				if (num > 1){
+					if(res[0] > 1) res[1] = num;
+					else res[0] = num;
+					
+					num = 1;
+				}
+			}
+		}
+		return res;
+	}
+	
+	public boolean isTwoPairs(){
+		if(this.nOfAKind()[0] == 2 && this.nOfAKind()[1] == 2){
+			return true;
+		}
+		else return false;
+	}
+	
+	public boolean isOnePair(){
+		if(this.nOfAKind()[0] == 2 && this.nOfAKind()[1] == 1) {
+			return true;
+		}
+		else if(this.nOfAKind()[0] == 1 && this.nOfAKind()[1] == 2) {
+			return true;
+		}
+		else return false;
+	}
+	
+	public boolean isFullHouse(){
+		return (this.nOfAKind()[0] == 3 && this.nOfAKind()[1] == 2) 
+				|| (this.nOfAKind()[0] == 2 && this.nOfAKind()[1] == 3);
+	
+
+	}
+	
+	public boolean isThreeOfAKind(){
+		return (this.nOfAKind()[0] == 3 && this.nOfAKind()[1] == 1);
+
+	}
+	
+	public boolean isFourOfAKind(){
+		return (this.nOfAKind()[0] == 4);
+	}
+	
+	public boolean isHighCard(){
+		return (this.nOfAKind()[0] == 1 && this.nOfAKind()[1] == 1);
+	}
+}

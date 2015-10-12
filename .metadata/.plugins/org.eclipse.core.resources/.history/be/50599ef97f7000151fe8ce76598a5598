@@ -1,0 +1,5 @@
+package ruichen;
+
+public enum Hand {
+	A_Straight_Flush("asdf",12);
+}

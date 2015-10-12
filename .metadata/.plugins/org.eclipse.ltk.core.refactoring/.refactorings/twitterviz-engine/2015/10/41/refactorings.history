@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move element &apos;EtcdAccesser.java&apos; to &apos;twitterviz-engine/src/main/java/com.ibm.cav&apos;&#x0A;- Original project: &apos;twitterviz-engine&apos;&#x0A;- Destination element: &apos;twitterviz-engine/src/main/java/com.ibm.cav&apos;&#x0A;- Original element: &apos;com.ibm.cav.servlet.EtcdAccesser.java&apos;&#x0A;- Update references to refactored element" description="Move compilation unit" destination="/src\/main\/java&lt;com.ibm.cav" element1="/src\/main\/java&lt;com.ibm.cav.servlet{EtcdAccesser.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.move" patterns="*" policy="org.eclipse.jdt.ui.moveResources" qualified="false" references="true" stamp="1444284966878" units="1" version="1.0"/>
+</session>

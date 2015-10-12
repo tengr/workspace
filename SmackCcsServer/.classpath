@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/gcm/gcm-server/lib/json_simple-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-bosh-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-bosh-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-bosh-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-compression-jzlib-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-compression-jzlib-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-compression-jzlib-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-core-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-core-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-core-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-core-compression-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-core-dns-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-debug-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-debug-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-debug-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-experimental-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-experimental-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-experimental-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-extensions-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-extensions-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-extensions-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-jingle-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-jingle-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-jingle-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-legacy-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-legacy-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-legacy-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-resolver-dnsjava-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-resolver-dnsjava-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-resolver-dnsjava-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-resolver-javax-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-resolver-javax-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-resolver-javax-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-resolver-minidns-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-resolver-minidns-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-resolver-minidns-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-tcp-4.0.6-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-tcp-4.0.6-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/smack_4_0_6/libs/smack-tcp-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/xmlpull-1.1.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/xmlpull_1_0_5.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/java/xmlpull_v1_impl"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ruichen/Documents/NICTA/Android/xmlpull-xpp3-1.1.4c.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

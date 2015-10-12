@@ -1,0 +1,19 @@
+package ruichen;
+
+public class Poker {
+	public static void main(String[] args){
+		//System.out.println("Hello WOrld");
+		//Card aCard = new Card(Suit.Deiamond, Rank._10);
+		//System.out.println(aCard.suit + aCard.rank);
+		System.out.println(Suit.values());
+		for (Suit suit : Suit.values()){
+			System.out.println(suit.name());
+		}
+		for (Rank rank : Rank.values()){
+			System.out.println(rank.name());
+		}
+		
+		Card aCard = new Card(Suit.valueOf("C"), Rank.valueOf("T"));
+		Syste.out.println(aCard.Suit.name() + " " + aCard)
+	}
+}

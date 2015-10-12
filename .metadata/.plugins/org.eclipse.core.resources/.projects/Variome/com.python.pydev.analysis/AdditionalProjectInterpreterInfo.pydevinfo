@@ -1,0 +1,32 @@
+-- VERSION_4
+-- START DISKCACHE
+/Users/ruichen/Documents/workspace/.metadata/.plugins/org.eclipse.core.resources/.projects/Variome/com.python.pydev.analysis/v2_indexcache
+distribute_file|1435108853000|/Users/ruichen/Documents/workspace/Variome/distribute_file.py
+bnst13_files|1435108750000|/Users/ruichen/Documents/workspace/Variome/bnst13_files.py
+-- END DISKCACHE
+-- START DICTIONARY
+2
+2=distribute_file
+1=bnst13_files
+-- END DICTIONARY
+-- START TREE 1
+15
+d|1|d!11@
+dat|1|data_dir!19@
+dev|1|dev_dir!11@
+dir|1|dirn!19@
+f_n|1|f_names!19@
+gen|1|generate_docs!18@
+get|1|get_fnames!10@
+off|1|offset!11@
+pre|2|prefix_set!19@prefix!19@
+pwd|1|pwd!11@
+t|1|t!11@
+te|1|te!11@
+tes|4|test_dir!19@test_set!19@test_dir!11@test_dest!11@
+tra|4|train_dir!19@train_set!19@train_dest!11@train_dir!11@
+tun|3|tune_set!19@tune_dest!11@tune_dir!19@
+-- END TREE
+-- START TREE 2
+0
+-- END TREE

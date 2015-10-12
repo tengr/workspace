@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="classes" path="src"/>
+	<classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
+	<classpathentry kind="lib" path="/Users/ruichen/Documents/NICTA/Android/gcm/gcm-server/lib/json_simple-1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/ruichen/Documents/NICTA/Android/gcm/gcm-server/lib/junit.jar"/>
+	<classpathentry kind="lib" path="/Users/ruichen/Documents/NICTA/Android/gcm/gcm-server/lib/mockito-all-1.8.5.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

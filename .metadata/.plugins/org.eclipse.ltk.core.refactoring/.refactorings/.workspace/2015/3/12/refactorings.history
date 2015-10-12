@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;quickSort&apos; to &apos;SortingTest&apos;" description="Rename resource &apos;quickSort&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="/quickSort" name="SortingTest" stamp="1426829251561" updateReferences="true"/>
+</session>

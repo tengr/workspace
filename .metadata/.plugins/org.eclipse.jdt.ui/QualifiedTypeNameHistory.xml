@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="com.google.android.gcm.demo.server.ApiKeyInitializer"/>
+<fullyQualifiedTypeName name="com.google.android.gcm.demo.server.Constants"/>
+<fullyQualifiedTypeName name="com.google.android.gcm.demo.server.Message.Builder"/>
+<fullyQualifiedTypeName name="com.google.android.gcm.demo.server.MulticastResult.Builder"/>
+<fullyQualifiedTypeName name="java.util.Scanner"/>
+<fullyQualifiedTypeName name="java.util.HashMap"/>
+<fullyQualifiedTypeName name="java.util.ArrayList"/>
+<fullyQualifiedTypeName name="java.io.BufferedWriter"/>
+<fullyQualifiedTypeName name="java.io.FileWriter"/>
+<fullyQualifiedTypeName name="java.io.File"/>
+<fullyQualifiedTypeName name="java.util.regex.Pattern"/>
+<fullyQualifiedTypeName name="java.util.regex.Matcher"/>
+<fullyQualifiedTypeName name="java.util.HashSet"/>
+<fullyQualifiedTypeName name="java.util.Set"/>
+<fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="mousio.etcd4j.promises.EtcdResponsePromise"/>
+<fullyQualifiedTypeName name="mousio.etcd4j.EtcdClient"/>
+<fullyQualifiedTypeName name="mousio.etcd4j.responses.EtcdKeysResponse"/>
+<fullyQualifiedTypeName name="mousio.etcd4j.responses.EtcdException"/>
+<fullyQualifiedTypeName name="io.netty.handler.timeout.TimeoutException"/>
+<fullyQualifiedTypeName name="java.util.concurrent.TimeUnit"/>
+<fullyQualifiedTypeName name="com.justinsb.etcd.EtcdClient"/>
+<fullyQualifiedTypeName name="com.justinsb.etcd.EtcdResult"/>
+<fullyQualifiedTypeName name="com.google.common.util.concurrent.ListenableFuture"/>
+<fullyQualifiedTypeName name="com.ibm.cav.servlet.EtcdAccesser"/>
+<fullyQualifiedTypeName name="java.util.Arrays"/>
+</qualifiedTypeNameHistroy>

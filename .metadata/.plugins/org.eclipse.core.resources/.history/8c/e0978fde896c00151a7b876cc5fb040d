@@ -1,0 +1,72 @@
+package com.ibm.cav.servlet;
+/***************************************************************************
+ * IBM Source Material
+ * (C) COPYRIGHT International Business Machines Corp., 2012.
+ *
+ * The source code for this program is not published or otherwise divested
+ * of its trade secrets, irrespective of what has been deposited with the
+ * U. S. Copyright Office.
+ ***************************************************************************/
+
+//Author Ruichen Teng ruichent@au1.ibm.com
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.concurrent.TimeoutException;
+
+import mousio.etcd4j.EtcdClient;
+import mousio.etcd4j.promises.EtcdResponsePromise;
+import mousio.etcd4j.responses.EtcdException;
+import mousio.etcd4j.responses.EtcdKeysResponse;
+
+/**
+ * class for accessing etcd key-value store
+ */
+
+public class EtcdAccesser {
+	private EtcdClient etcdClient;
+	private String etcdCavKey;
+	private String etcdNameSpace;
+	
+	public EtcdAccesser(String nameSpace, URI... baseUri) {
+		this.etcdClient = new EtcdClient(baseUri);
+		this.etcdNameSpace = "/smart/cav-properties/" + nameSpace + "/";
+	}
+	
+//	public EtcdAccesser(String nameSpace, String etcdCavKey, URI... baseUri) {
+//		this.etcdCavKey = etcdCavKey;		
+//		if (!this.etcdCavKey.substring(this.etcdCavKey.length() - 1).equals("/")) {
+//			this.etcdCavKey = this.etcdCavKey + "/";				
+//		}
+//		this.etcdClient = new EtcdClient(baseUri);
+//	}
+//	
+	public String getValue(String key) {
+		EtcdKeysResponse etcdKeysResponse;
+		try {
+			etcdKeysResponse = etcdClient.get(this.etcdCavKey+ key).send().get();
+		} catch (IOException | EtcdException | TimeoutException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			return null;
+		}
+		return etcdKeysResponse.node.value;
+	}
+	
+	public String getValue(String etcdCavKey, String key) {
+		this.etcdCavKey = etcdCavKey;
+		return getValue(key);
+	}
+
+	public boolean containsKey(String key) {
+		return (getValue(key) != null);
+	}
+	
+	public boolean containsKey(String etcdCavKey, String key) {
+		this.etcdCavKey = etcdCavKey;
+		return (getValue(key) != null);
+	}
+	
+	
+	
+}

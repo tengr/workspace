@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item value="false" key="isRegEx"/>
+		<item value="visu" key="selection"/>
+		<item value="false" key="casesensitive"/>
+		<item value="false" key="incremental"/>
+		<item value="true" key="wrap"/>
+		<item value="false" key="wholeword"/>
+		<list key="findhistory">
+			<item value="visu"/>
+			<item value="etcdCavKey"/>
+			<item value="extractedPathsCombined"/>
+			<item value="trigger"/>
+			<item value="evaluate"/>
+			<item value="Trigger"/>
+			<item value="len_prelistvsm"/>
+			<item value="score[each_query]"/>
+		</list>
+		<list key="replacehistory">
+			<item value="etcdRootDir"/>
+			<item value="copy2"/>
+			<item value="offset"/>
+			<item value="out_file"/>
+			<item value=""/>
+			<item value="f_name"/>
+			<item value="doc_lensq"/>
+			<item value="f_names"/>
+		</list>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
+		<item value="347" key="DIALOG_WIDTH"/>
+		<item value="1|.Helvetica Neue DeskInterface|18.0|0|COCOA|1|.HelveticaNeueDeskInterface-Regular" key="DIALOG_FONT_NAME"/>
+		<item value="453" key="DIALOG_HEIGHT"/>
+		<item value="933" key="DIALOG_X_ORIGIN"/>
+		<item value="94" key="DIALOG_Y_ORIGIN"/>
+	</section>
+</section>

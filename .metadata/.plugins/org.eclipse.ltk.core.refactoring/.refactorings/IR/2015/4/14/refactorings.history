@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;IR/tengr/my_parser&apos; to &apos;my_parser.py&apos;" description="Rename resource &apos;my_parser&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="tengr/my_parser" name="my_parser.py" stamp="1428067266285" updateReferences="true"/>
+</session>

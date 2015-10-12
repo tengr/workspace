@@ -1,0 +1,11 @@
+package ruichen;
+
+public enum Suit {
+	Club("C"), Diamond("D"), Heart("H"), Spade("S");
+	
+	private String initial;
+	
+	private Suit(String initial){
+		this.initial = initial;
+	}
+}

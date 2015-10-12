@@ -1,0 +1,16 @@
+INSTUPtengr.bi_query
+/Users/ruichen/Documents/workspace/IR/tengr/bi_query.py
+INFOS:&&3|1|2|0&&3|3|2|0&&3|4|2|0&&3|5|2|0&&3|6|2|0&&3|7|2|0&&3|8|2|0&&3|9|2|0&&3|10|2|0&&3|11|2|0&&3|8|2|0&&3|9|2|0&&3|12|2|0&&3|13|2|0&&3|13|2|0
+tengr.bi_query=2
+bidic=5
+subdic=9
+bi_ranking_file=1
+word1=8
+ordered_subdic=12
+word2=10
+doc_ids=13
+stemmer=6
+terms=7
+f_names=4
+q_num=3
+word=11

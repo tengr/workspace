@@ -1,0 +1,78 @@
+package com.ibm.cav.servlet;
+/***************************************************************************
+ * IBM Source Material
+ * (C) COPYRIGHT International Business Machines Corp., 2012.
+ *
+ * The source code for this program is not published or otherwise divested
+ * of its trade secrets, irrespective of what has been deposited with the
+ * U. S. Copyright Office.
+ ***************************************************************************/
+
+//Author Ruichen Teng ruichent@au1.ibm.com
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.concurrent.TimeoutException;
+
+import mousio.etcd4j.EtcdClient;
+import mousio.etcd4j.promises.EtcdResponsePromise;
+import mousio.etcd4j.responses.EtcdException;
+import mousio.etcd4j.responses.EtcdKeysResponse;
+
+/**
+ * class for accessing etcd key-value store
+ */
+
+public class EtcdAccesser {
+	private EtcdClient etcdClient;
+	private String etcdRootDir;
+	private String etcdNameSpace;
+	
+	public EtcdAccesser(String etcdRootDir, String nameSpace, URI... baseUri) {
+		this.etcdRootDir = etcdRootDir;		
+		if (!this.etcdRootDir.substring(this.etcdRootDir.length() - 1).equals("/")) {
+			this.etcdRootDir = this.etcdRootDir + "/";				
+		}
+		this.etcdNameSpace = this.etcdRootDir + nameSpace + "/";
+		this.etcdClient = new EtcdClient(baseUri);
+	}
+	
+	public EtcdAccesser(String nameSpace, URI... baseUri) {
+		this("/smart/", nameSpace, baseUri);
+	}
+	
+	
+	public String getValue(String key) {
+		EtcdKeysResponse etcdKeysResponse;
+		try {
+			etcdKeysResponse = etcdClient.get(this.etcdNameSpace + key).send().get();
+		} catch (IOException | EtcdException | TimeoutException e) {
+			// TODO Auto-generated catch block
+			//e.printStackTrace();
+			return null;
+		}
+		return etcdKeysResponse.node.value;
+	}
+	
+	public String getValue(String etcdNameSpace, String key) {
+		if (!etcdNameSpace.substring(etcdNameSpace.length() - 1).equals("/")) {
+			return getValue(etcdNameSpace + "/" + key);				
+		}
+		return getValue(etcdNameSpace + key);
+	}
+
+	public boolean containsKey(String key) {
+		return (getValue(key) != null);
+	}
+	
+	public boolean containsKey(String etcdNameSpace, String key) {
+		if (!etcdNameSpace.substring(etcdNameSpace.length() - 1).equals("/")) {
+			return (getValue(etcdNameSpace + "/" + key) != null);				
+		}
+		return (getValue(etcdNameSpace + key) != null);
+		return (getValue(key) != null);
+	}
+	
+	
+	
+}

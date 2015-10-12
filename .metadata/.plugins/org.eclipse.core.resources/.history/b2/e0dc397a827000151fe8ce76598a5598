@@ -1,0 +1,13 @@
+package ruichen;
+
+public enum Rank {
+	_2("2"), _3("3"), _4("4"), _5("5");//, _6("6",6), _7("7", 7), _8("8", 8), _9("9", 9), _10("T", 10), Jack("J", 11), Queen("Q", 12), King("K",13), Ace("A",14);
+	
+	private String initial;
+	private int rank;
+	
+	private Rank(String initial){
+		this.initial = initial;
+		this.rank = this.ordinal();
+	}
+}

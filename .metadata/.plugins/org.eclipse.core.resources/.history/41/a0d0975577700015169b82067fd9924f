@@ -1,0 +1,6 @@
+package ruichen;
+
+public class Card {
+	private Enum<Suit> suit;
+	private Enum<Rank> rank;
+}

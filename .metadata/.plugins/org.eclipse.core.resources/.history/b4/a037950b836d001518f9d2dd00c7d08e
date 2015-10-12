@@ -1,0 +1,130 @@
+package com.ibm.cav;
+
+import java.io.File;
+import java.io.FileReader;
+import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class CavContext {
+
+	private static final Logger LOGGER = LoggerFactory
+            .getLogger(CavContext.class);
+	
+	private String propertiesFileName;
+    private File f;
+    private Properties prop;
+	    
+    public CavContext()
+    {		
+         propertiesFileName = "cav.properties";
+         LOGGER.debug("loading "+ propertiesFileName);
+         f = new File(propertiesFileName);
+         prop = new Properties();
+         try {
+             prop.load(new FileReader(f));
+         } catch (final Exception e) {
+             LOGGER.error("Error loading CAV properties file ", e);
+         }
+         LOGGER.debug("loaded");
+    }
+    
+    public CavContext(String filePathForTest)
+    {
+         propertiesFileName = filePathForTest+"cav.properties";
+         LOGGER.debug("loading "+propertiesFileName);
+         f = new File(propertiesFileName);
+         prop = new Properties();
+         try {
+             prop.load(new FileReader(f));
+         } catch (final Exception e) {
+             LOGGER.error("Error loading CAV properties file ", e);
+         }
+    }
+    
+    public boolean keyExists(String keyString) 
+    { 
+        if (prop.containsKey(keyString)) 
+        {
+           return true;
+        } 
+        else 
+        {
+        	LOGGER.debug(keyString+" was not found in CAV properties file");
+            return false;
+        }          
+    }
+    
+    public void checkKeyBeforeReturning(String keyString)
+    {
+    	try 
+    	{
+    		if (!keyExists(keyString))
+        	{
+        		throw new Exception(keyString+" was not found in CAV properties file");
+        	}
+		} 
+    	catch (Exception e) 
+    	{
+    		LOGGER.debug(e.getMessage());
+		}
+    }
+ 
+    public String keyValueAsString(String keyString) 
+    { 
+            checkKeyBeforeReturning(keyString);
+            String value = prop.get(keyString).toString();
+            LOGGER.debug(keyString+" = "+value);
+            return value;
+    }
+    
+    public int keyValueAsInt(String keyString) 
+    { 
+    	try
+    	{
+    		checkKeyBeforeReturning(keyString);
+    		int value = Integer.parseInt(prop.get(keyString).toString());
+    		LOGGER.debug(keyString+" = "+value);
+    		return value;
+    	}
+    	catch(NumberFormatException e)
+    	{
+    		LOGGER.debug("Invalid value: "+keyString+" = -1");
+    		return -1;
+    	}
+    }
+    
+    public double keyValueAsDouble(String keyString) 
+    { 
+    	try
+    	{
+    		checkKeyBeforeReturning(keyString);
+    		double value = Double.parseDouble(prop.get(keyString).toString());
+    		LOGGER.debug(keyString+" = "+value);
+    		return value;
+    	}
+    	catch(NumberFormatException e)
+    	{
+    		LOGGER.debug("Invalid value: "+keyString+" = -1.0");
+    		return -1.0;
+    	}
+    	
+    }
+    
+    public boolean keyValueAsBoolean(String keyString) 
+    { 
+    	checkKeyBeforeReturning(keyString);
+    	String value = keyValueAsString(keyString);
+    	if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false"))
+    	{
+    		LOGGER.debug(keyString+" = "+value);
+    		return Boolean.valueOf(value);
+    	}
+    	else 
+    	{
+    		LOGGER.debug("Invalid value: "+keyString+" is set as false");
+    		return false;
+		}	
+    }
+}

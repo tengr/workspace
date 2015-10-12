@@ -1,0 +1,3 @@
+bin
+score.txt
+src

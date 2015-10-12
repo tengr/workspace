@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bnd-LastModified: 1353335453792
+Build-Jdk: 1.6.0_22
+Built-By: hudson-stepan
+Bundle-Description: JSR 356:Java API for WebSocket
+Bundle-DocURL: http://www.oracle.com
+Bundle-License: https://glassfish.java.net/public/CDDL+GPL_1_1.html
+Bundle-ManifestVersion: 2
+Bundle-Name: WebSocket API jar
+Bundle-SymbolicName: javax.net.websocket-api
+Bundle-Vendor: Oracle
+Bundle-Version: 0.0.99.b06
+Created-By: Apache Maven Bundle Plugin
+Extension-Name: javax.net.websocket
+Implementation-Version: 1.0-b06
+Specification-Version: 0.0.99.06
+Tool: Bnd-1.50.0

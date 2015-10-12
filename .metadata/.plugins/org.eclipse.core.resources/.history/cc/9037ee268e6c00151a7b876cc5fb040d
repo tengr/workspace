@@ -1,0 +1,158 @@
+package com.ibm.cav.servlet;
+
+/***************************************************************************
+ * IBM Source Material
+ * (C) COPYRIGHT International Business Machines Corp., 2012.
+ *
+ * The source code for this program is not published or otherwise divested
+ * of its trade secrets, irrespective of what has been deposited with the
+ * U. S. Copyright Office.
+ ***************************************************************************/
+
+//Author eser@us.ibm.com
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.URI;
+import java.util.Enumeration;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ibm.cav.CavContext;
+
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.ConfigurationBuilder;
+
+/**
+ * Servlet implementation class CAVTwitterSigninServlet
+ */
+@WebServlet("/CAVTwitterSigninServlet")
+public class TwitterSigninServlet extends HttpServlet implements
+		ITwitterServletConstants {
+	private static final long serialVersionUID = 1L;
+	CavContext cavcontext = new CavContext();
+	private static final Logger LOGGER = LoggerFactory.getLogger(TwitterSigninServlet.class);
+
+	public TwitterSigninServlet() 
+	{
+		super();
+	}
+
+	@Override
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+	{
+		Enumeration<String> requestParameters = request.getParameterNames();
+        while (requestParameters.hasMoreElements()) 
+        {
+            String paramName = (String) requestParameters.nextElement();
+            //LOGGER.info("Request Paramter Name: " + paramName+ ", Value - " + request.getParameter(paramName));
+        }
+        
+		final ConfigurationBuilder c = new ConfigurationBuilder().setJSONStoreEnabled(true);
+		final Twitter twitter = new TwitterFactory(c.build()).getInstance();
+		EtcdAccesser etcdAccesser = null;
+		String etcdURL = null, etcdNameSpace = null,
+		
+		if(System.getenv().containsKey("etcd_url")) {
+			etcdURL = System.getenv().get("etcd_url");
+		} 
+		else {
+			etcdURL = "http://discovery1-mel.sl.cloud9.ibm.com:4001";
+		}
+		
+		if(System.getenv().containsKey("etcd_namespace")){
+			etcdNameSpace = System.getenv().get("etcd_namespace");
+		}
+		else{
+			etcdNameSpace = "smart/default/";
+		}
+		
+		etcdAccesser = new EtcdAccesser("smart/default/", 
+							URI.create("http://discovery1-mel.sl.cloud9.ibm.com:4001"), 
+        				   URI.create("http://discovery2-mel.sl.cloud9.ibm.com:4001"),
+        				   URI.create("http://discovery3-mel.sl.cloud9.ibm.com:4001"));
+		
+		if(etcdAccesser.containsKey("consumer_key")  && etcdAccesser.containsKey("consumer_secret") ) {
+			twitter.setOAuthConsumer(etcdAccesser.getValue("consumer_key"), etcdAccesser.getValue("consumer_secret"));
+		}
+		else if(System.getenv().containsKey("consumer_key") && System.getenv().containsKey("consumer_secret")){
+			twitter.setOAuthConsumer(System.getenv().get("consumer_key"), System.getenv().get("consumer_secret"));
+		}
+		else{
+			twitter.setOAuthConsumer(cavcontext.keyValueAsString("consumer_key"), cavcontext.keyValueAsString("consumer_secret"));
+		}
+		request.getSession().setAttribute(SESSION_TWITTER, twitter);
+
+		try {
+			final StringBuffer callbackURL;
+			
+			if(etcdAccesser.containsKey("server_url"))
+			{
+				callbackURL = new StringBuffer(etcdAccesser.getValue("server_url") + ("cav/"));
+			}
+			else if(System.getenv().containsKey("server_url"))
+			{
+				callbackURL = new StringBuffer(System.getenv().get("server_url") + ("cav/"));
+			}		
+			else if(cavcontext.keyExists("server_url"))
+			{
+				callbackURL = new StringBuffer(cavcontext.keyValueAsString("server_url")).append("cav/");
+			}
+			else 
+			{
+				//callbackURL = request.getRequestURL();
+				callbackURL = new StringBuffer(InetAddress.getLocalHost().toString()).append("cav/");
+			}
+			final int index = callbackURL.lastIndexOf("/");
+			
+			String signintype;
+			String isRedirected;
+			
+			if(request.getParameterMap().containsKey("signintype"))
+			{
+				LOGGER.debug("In Signin servlet.");
+				signintype = request.getParameter("signintype");
+				isRedirected = "false";
+				
+				if (signintype.equals(new String(SIGNIN_TYPE_SYSTEM)))
+				{
+					callbackURL.replace(index, callbackURL.length(), "").append("/callbacksystem");
+				}
+				else if (signintype.equals(new String(SIGNIN_TYPE_NONSYSTEM)))
+				{
+					callbackURL.replace(index, callbackURL.length(), "").append("/callbacknonsystem?isRedirected="+isRedirected);
+				}
+			}
+			else //redirected
+			{
+				LOGGER.debug("In Signin servlet redirected from other endpoint.");
+				isRedirected = "true";
+				callbackURL.replace(index, callbackURL.length(), "").append("/callbacknonsystem?isRedirected="+isRedirected);
+			}
+
+			final RequestToken requestToken = twitter.getOAuthRequestToken(callbackURL.toString());
+			request.getSession().setAttribute(SESSION_REQUEST_TOKEN,requestToken);
+			response.sendRedirect(requestToken.getAuthorizationURL());
+			
+		} catch (final TwitterException e) {
+			throw new ServletException(e);
+		}
+	}
+
+	@Override
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		
+	}
+
+}
